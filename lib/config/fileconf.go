@@ -397,6 +397,8 @@ type Global struct {
 
 // CachePolicy is used to control  local cache
 type CachePolicy struct {
+	// Type is for cache type `sqlite` or `in-memory`
+	Type string `yaml:"type,omitempty"`
 	// EnabledFlag enables or disables cache
 	EnabledFlag string `yaml:"enabled,omitempty"`
 	// TTL sets maximum TTL for the cached values
@@ -431,6 +433,7 @@ func (c *CachePolicy) NeverExpires() bool {
 // Parse parses cache policy from Teleport config
 func (c *CachePolicy) Parse() (*service.CachePolicy, error) {
 	out := service.CachePolicy{
+		Type:         c.Type,
 		Enabled:      c.Enabled(),
 		NeverExpires: c.NeverExpires(),
 	}
@@ -443,6 +446,9 @@ func (c *CachePolicy) Parse() (*service.CachePolicy, error) {
 		if err != nil {
 			return nil, trace.BadParameter("cache.ttl invalid duration: %v, accepted format '10h'", c.TTL)
 		}
+	}
+	if err := out.CheckAndSetDefaults(); err != nil {
+		return nil, trace.Wrap(err)
 	}
 	return &out, nil
 }
