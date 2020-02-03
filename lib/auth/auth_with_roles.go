@@ -846,6 +846,15 @@ func (a *AuthWithRoles) UpdatePluginData(ctx context.Context, params services.Pl
 	}
 }
 
+// Ping gets basic info about the auth server.
+func (a *AuthWithRoles) Ping(ctx context.Context) (proto.PingResponse, error) {
+	// We don't actually need to perform any auth checks here; this method
+	// does not return any private data.
+	return proto.PingResponse{
+		ServerVersion: teleport.Version,
+	}, nil
+}
+
 // withUpdateBy creates a child context with the AccessRequestUpdateBy
 // value set.  Expected by AuthServer.SetAccessRequestState.
 func withUpdateBy(ctx context.Context, user string) context.Context {

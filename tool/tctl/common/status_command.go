@@ -17,6 +17,7 @@ limitations under the License.
 package common
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -62,6 +63,12 @@ func (c *StatusCommand) Status(client auth.ClientI) error {
 	}
 	clusterName := clusterNameResource.GetClusterName()
 
+	pingRsp, err := client.Ping(context.TODO())
+	if err != nil {
+		return trace.Wrap(err)
+	}
+	serverVersion := pingRsp.ServerVersion
+
 	hostCAs, err := client.GetCertAuthorities(services.HostCA, false)
 	if err != nil {
 		return trace.Wrap(err)
@@ -83,6 +90,7 @@ func (c *StatusCommand) Status(client auth.ClientI) error {
 	view := func() string {
 		table := asciitable.MakeHeadlessTable(2)
 		table.AddRow([]string{"Cluster", clusterName})
+		table.AddRow([]string{"Version", serverVersion})
 		for _, ca := range authorities {
 			if ca.GetClusterName() != clusterName {
 				continue
